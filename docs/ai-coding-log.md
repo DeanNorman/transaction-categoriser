@@ -27,3 +27,5 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
 
 - Decision records 0001 to 0005 and `docs/plan.md`: drafted by the tool from the grill answers, read and corrected
   by the author before the first code commit.
+- Data model (#2): the tool proposed masking IBANs as `NL**INGB******3686`; changed by hand to a generic "first two,
+  last four" mask that also hides the length, and decision 0005 was corrected to match before the code landed.
