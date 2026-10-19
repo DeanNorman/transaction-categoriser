@@ -32,3 +32,6 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
 - Rules (#4): the tool's first draft of the "unknown merchant" test asserted that an Italian restaurant name *would*
   match a rule; the run failed and the assertion was turned round: an unknown merchant must match nothing, so the
   model gets asked. Caught by running the suite, not by reading.
+- Pipeline (#5): nine tests failed at once because the tool had used "Coolblue order 4471" as its example of an
+  unknown merchant, and Coolblue is in the shop rule. The rules did their job; the tests were corrected to use a
+  merchant no rule knows. A reminder that the fixture has to be checked against the rules, not assumed.
