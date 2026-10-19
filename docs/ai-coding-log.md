@@ -42,3 +42,6 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
 - Process (19 Oct): GitHub closed the stacked rules PR when the data-model branch beneath it was deleted on merge;
   it does not retarget. The PR was reopened against `main`, and the rule from here on is: retarget the dependent PR
   to `main` before merging the PR it stacks on.
+- API (#7): one integration test caught that every list query was quietly filtering `needs_review=false`: DRF
+  treats a query string as form input, where a missing boolean is False rather than absent. Fixed by passing a
+  plain dict. The kind of bug a unit test on the serializer would never have seen.
