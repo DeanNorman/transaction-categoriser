@@ -53,3 +53,7 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
   as a tabular number with a small bar, a left-edge accent on flagged rows, and the line "confidence is the
   categoriser's own estimate, not a measured accuracy". The tool's first draft called an `inline_serializer`
   result as if it were a class; the collection error said so at once.
+- Docker (#11): verified by running it, not by reading it: image built, `web` healthy in 15 s, the sample imported
+  and categorised on first start, every endpoint 200, the suite green inside the container, and a restart importing
+  0 and skipping 1,000. The tool's first `curl | python -c` check line had a quoting error and printed nothing; the
+  raw endpoint calls were the evidence instead.
