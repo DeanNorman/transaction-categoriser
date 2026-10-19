@@ -1,5 +1,6 @@
-"""One importer for the endpoint and the command. Rows are validated like a POST, existing IDs are skipped, bad rows
-are reported with their line number, and each row is its own transaction so one failure never spoils the rest."""
+"""The importer behind `manage.py import_csv`, used to seed the sample on first run (decision 0006). Rows are validated
+by the same serializer a `POST /transactions` uses, existing IDs are skipped, bad rows are reported with their line
+number, and each row is its own transaction so one failure never spoils the rest."""
 
 import csv
 import io

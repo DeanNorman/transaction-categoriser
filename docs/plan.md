@@ -12,7 +12,8 @@ plan lives on the issue tracker as a map with one sub-issue per step, each lande
 6. [x] The pipeline: rules, cache, provider seam with a fake, fallback, `needs_review`; tests for each path.
 7. [x] Gemini provider: structured output, validation in code, time limit, the prompt as a file; tests with a stub.
 8. [x] API: `POST /transactions`, `GET /transactions` (paged, filters), `GET /transactions/:id`; masking; tests.
-9. [x] CSV import: `POST /transactions/import` and `manage.py import_csv`; idempotent; counts; tests.
+9. [x] CSV import: `POST /transactions/import` and `manage.py import_csv`; idempotent; counts; tests. The endpoint was
+   removed on the day (decision 0006): submissions are one at a time, and a client script feeds a CSV through them.
 10. [x] OpenAPI schema and Swagger UI at `/docs`.
 11. [x] Review page at `/review`: counts per category, every row with its reason, filters.
 12. [x] `GET /categories` with counts.
@@ -26,4 +27,6 @@ plan lives on the issue tracker as a map with one sub-issue per step, each lande
 - Authentication and per-client scoping (first thing before any real deployment).
 - A queue for imports at volume; batching descriptions per model call.
 - A human override endpoint and a categorisation history table.
-- Rate limiting; a `recategorise` run when rules or the prompt change (the command exists; scheduling does not).
+- Rate limiting; scheduling `recategorise` when rules or the prompt change (the command exists).
+
+17. [x] Single submissions (#27): the bulk endpoint removed, `scripts/post_transactions.py` added, decision 0006.

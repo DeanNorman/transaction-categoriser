@@ -2,8 +2,7 @@
 
 [![tests](https://github.com/DeanNorman/transaction-categoriser/actions/workflows/tests.yml/badge.svg)](https://github.com/DeanNorman/transaction-categoriser/actions/workflows/tests.yml)
 
-Submit banking transactions, one at a time or as a CSV, and get them back in one of ten categories with a
-confidence, a one-line reason, and a record of how the decision was made: a rule, a cached model answer, the model,
+Submit banking transactions, one at a time, and get them back in one of ten categories with a confidence, a one-line reason, and a record of how the decision was made: a rule, a cached model answer, the model,
 or a fallback flagged for a person. Python, Django and Django REST Framework on PostgreSQL, Gemini for the long
 tail of merchants, all in Docker.
 
@@ -34,7 +33,8 @@ flagged `needs_review`, with a reason that says what to set. Add the key later a
 `docker compose run --rm web python manage.py recategorise` to upgrade those rows.
 
 Other commands: `make test` (the suite against Postgres, inside the image), `make eval` (score the categoriser
-against the gold set), `make decide TEXT="Fietsenmaker Van Dam"` (try one description), `make logs`, `make down`.
+against the gold set), `make decide TEXT="Fietsenmaker Van Dam"` (try one description), `make post-sample` (feed the
+sample CSV through `POST /transactions`, one request per row), `make logs`, `make down`.
 
 ## The API
 
@@ -43,10 +43,11 @@ against the gold set), `make decide TEXT="Fietsenmaker Van Dam"` (try one descri
 | `POST /transactions` | Submit one transaction. Validated, saved and categorised; returns the row with its decision. A repeated `id` is a 409. |
 | `GET /transactions` | All categorised transactions, newest first, 50 per page (`page_size` up to 500). Filters: `category`, `method`, `needs_review`, `account`, `since`, `until`. An unknown filter value is a 400 that names the field. |
 | `GET /transactions/{id}` | One transaction by the bank's ID, or the ID generated on submit. |
-| `POST /transactions/import` | A CSV in the brief's column layout, as multipart `file`. Existing IDs are skipped; bad rows are reported with their line number. |
 | `GET /categories` | The ten categories with counts, zero included, and how many in each need a look. |
 
 Paths work with or without a trailing slash. There is no authentication in this exercise (see decision 0005).
+Submission is one transaction per request, as an integration would send them; a CSV is fed through the same
+endpoint row by row by `scripts/post_transactions.py` (decision 0006). There is no bulk upload endpoint.
 
 ```sh
 curl -s -X POST localhost:8000/transactions -H 'content-type: application/json' -d '{
@@ -68,7 +69,7 @@ curl -s -X POST localhost:8000/transactions -H 'content-type: application/json' 
 ```sh
 curl -s "localhost:8000/transactions?category=Groceries&needs_review=false&page_size=5"
 curl -s localhost:8000/transactions/TXN00001
-curl -s -F file=@data/transaction_history.csv localhost:8000/transactions/import
+python3 scripts/post_transactions.py --base-url http://localhost:8000 data/transaction_history.csv   # a CSV, one POST per row
 ```
 
 Reading a response: `amount` is a signed decimal string (money is integer cents inside, never a float); the
@@ -119,7 +120,7 @@ DATABASE_URL=postgres://app:app@localhost:5432/transactions .venv/bin/pytest   #
 137 tests: money and masking; the models; normalisation and every rule against the sample and an unseen merchant
 per category; the pipeline's paths (rule, cache, model, four kinds of invalid answer, provider error, threshold);
 the Gemini provider with a stubbed client; the API end to end including masking, filters, paging and the error
-shapes; the import's idempotency and counts; the schema; the review page; the evaluation and recategorise
+shapes; the seed command's idempotency and counts; the client script against a live test server; the schema; the review page; the evaluation and recategorise
 commands. CI runs the suite against Postgres and SQLite on every push and pull request.
 
 ## Trade-offs and decisions
@@ -140,6 +141,8 @@ The full records are in [`docs/decisions/`](docs/decisions/). In short:
   categories, not identity.
 - **Categorisation runs in the request.** One call per unknown description, about 20 for the sample file. A queue
   and batching are the next step at volume, not a prerequisite.
+- **One way in.** Transactions are posted one at a time; a CSV goes through the same endpoint from a client script.
+  Two endpoints would be two things to secure and keep consistent. The first-run seed uses the same validation.
 - **No authentication.** Out of scope for the exercise and the first thing before any real deployment.
 
 Listed, not built: authentication and per-client scoping; a queue for large imports; batching descriptions per
@@ -172,6 +175,7 @@ step, each landed by its own pull request with the test numbers from the run in 
 | `config/` | Django settings (from the environment), URLs, the schema hook |
 | `prompts/categorise.md` | The prompt the model sees, versioned |
 | `data/` | The sample CSV from the brief and the gold set |
+| `scripts/post_transactions.py` | Feeds a CSV through `POST /transactions`, one request per row |
 | `docs/decisions/` | The five decision records; `docs/plan.md`, `docs/evaluation.md`, `docs/ai-coding-log.md` |
 | `Dockerfile`, `docker-compose.yml`, `docker/entrypoint.sh`, `Makefile` | Running it |
 | `requirements.txt`, `requirements-dev.txt`, `requirements.lock` | Pinned dependencies; the lock is frozen from the built image |
