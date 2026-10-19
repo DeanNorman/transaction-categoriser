@@ -66,3 +66,5 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
 - Single submissions (#27): the interviewer's steer on the day was single POSTs, not a batch upload. The bulk endpoint
   was removed rather than kept 'just in case', the CSV path became a stdlib client that posts row by row, and the
   change got its own decision record and ticket so the history shows the turn and the reason.
+- Journey doc: line numbers were collected with grep from the code as it is, not typed from memory, and the doc says
+  the names are stable and the numbers are from the time of writing.

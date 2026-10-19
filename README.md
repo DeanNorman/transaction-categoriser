@@ -98,7 +98,8 @@ Decision records: [0002](docs/decisions/0002-categorisation-pipeline.md) and [00
 5. **Fallback**: on no key, a timeout, an error or an invalid answer, the transaction is still saved, as
    `Miscellaneous` with confidence 0, method `fallback`, the cause in the reason, and `needs_review` set.
 
-`manage.py decide "<text>"` runs the pipeline on any text and prints the decision.
+`manage.py decide "<text>"` runs the pipeline on any text and prints the decision. To follow one request through
+the code, file by file, with the test that pins each step: [`docs/journey-of-a-transaction.md`](docs/journey-of-a-transaction.md).
 
 ### Evaluation
 
