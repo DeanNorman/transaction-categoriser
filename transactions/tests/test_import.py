@@ -1,10 +1,8 @@
-import io
 from pathlib import Path
 
 import pytest
 from django.conf import settings
 from django.core.management import call_command
-from rest_framework.test import APIClient
 
 from transactions.importer import BadFile, import_csv
 from transactions.models import Method, Transaction
@@ -69,27 +67,6 @@ def test_unknown_descriptions_cost_one_provider_call_each_not_one_per_row():
 def test_the_wrong_columns_are_refused_before_any_row():
     with pytest.raises(BadFile, match="missing columns"):
         import_csv("id,amount\n1,2\n")
-
-
-def test_the_endpoint_imports_a_file_and_reports_counts(settings):
-    settings.CATEGORISER_PROVIDER = "fake"
-    upload = io.BytesIO((HEADER + "TXN1,-10.00,2024-05-16 07:22:18,Albert Heijn Purchase,debit,NLINGB1944573686\n").encode())
-    upload.name = "history.csv"
-
-    response = APIClient().post("/transactions/import", {"file": upload}, format="multipart")
-
-    assert response.status_code == 200
-    assert response.json() == {"created": 1, "skipped": 0, "rejected_count": 0, "rejected": []}
-
-
-def test_the_endpoint_refuses_a_missing_or_malformed_file(settings):
-    settings.CATEGORISER_PROVIDER = "fake"
-    client = APIClient()
-
-    assert client.post("/transactions/import", {}, format="multipart").status_code == 400
-    bad = io.BytesIO(b"id,amount\n1,2\n"); bad.name = "bad.csv"
-    response = client.post("/transactions/import", {"file": bad}, format="multipart")
-    assert response.status_code == 400 and "missing columns" in response.json()["file"][0]
 
 
 def test_the_command_imports_a_file(settings, capsys):

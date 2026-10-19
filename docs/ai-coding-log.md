@@ -63,3 +63,6 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
   surfaced the gap and it was built here, with the decision record corrected to describe what exists.
 - README (#13): written last, from what was run, with the response JSON and the numbers pasted from the Docker run
   and the evaluation. `requirements.lock` is `pip freeze` from inside the built image, not from the laptop.
+- Single submissions (#27): the interviewer's steer on the day was single POSTs, not a batch upload. The bulk endpoint
+  was removed rather than kept 'just in case', the CSV path became a stdlib client that posts row by row, and the
+  change got its own decision record and ticket so the history shows the turn and the reason.
