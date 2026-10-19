@@ -2,6 +2,7 @@
 
 from django.db import transaction as db
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema, extend_schema_view, inline_serializer
 from rest_framework import generics, serializers, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import MultiPartParser
@@ -86,6 +87,32 @@ class Pagination(PageNumberPagination):
     max_page_size = 500
 
 
+EXAMPLE_IN = OpenApiExample("A municipal tax payment", value={
+    "id": "TXN00001", "amount": "-87.18", "timestamp": "2024-05-16 07:22:18", "description": "Municipal Tax Payment",
+    "transaction_type": "debit", "account_number": "NLINGB1944573686"}, request_only=True)
+EXAMPLE_OUT = OpenApiExample("Categorised", value={
+    "id": "TXN00001", "amount": "-87.18", "currency": "EUR", "timestamp": "2024-05-16T05:22:18Z",
+    "description": "Municipal Tax Payment", "transaction_type": "debit", "account_number": "NL******3686",
+    "category": "Housing", "confidence": "0.70", "method": "rule",
+    "reason": "municipal property and household taxes (decision 0004)", "model_name": "", "prompt_version": "",
+    "categorised_at": "2026-10-19T13:00:00Z", "needs_review": False, "created_at": "2026-10-19T13:00:00Z"}, response_only=True)
+
+
+@extend_schema_view(
+    get=extend_schema(
+        summary="List categorised transactions",
+        description="Newest first, 50 per page (`page_size` up to 500). Every filter value is validated: an unknown category is a 400 that names the field. Account numbers are masked.",
+        parameters=[FilterSerializer],
+        responses={200: TransactionSerializer(many=True)},
+    ),
+    post=extend_schema(
+        summary="Submit one transaction",
+        description="Validated, saved and categorised in one go. The response carries the category, the confidence, how it was decided (rule, cache, model, fallback) and the reason. A timestamp without a zone is read as Europe/Amsterdam. A repeated ID is a 409.",
+        request=TransactionInputSerializer,
+        responses={201: TransactionSerializer, 400: OpenApiResponse(description="Validation errors, keyed by field"), 409: OpenApiResponse(description="A transaction with this ID already exists")},
+        examples=[EXAMPLE_IN, EXAMPLE_OUT],
+    ),
+)
 class TransactionList(generics.ListCreateAPIView):
     """GET: every categorised transaction, newest first, paged. POST: submit one; it comes back categorised."""
 
@@ -108,6 +135,7 @@ class TransactionList(generics.ListCreateAPIView):
         return Response(TransactionSerializer(record).data, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(summary="Fetch one transaction", description="By the ID the bank gave it, or the one generated on submit.", responses={200: TransactionSerializer, 404: OpenApiResponse(description="No such transaction")})
 class TransactionDetail(generics.RetrieveAPIView):
     """GET one transaction by the ID the bank gave it, or the one we generated."""
 
@@ -122,6 +150,18 @@ class ImportSerializer(serializers.Serializer):
     file = serializers.FileField(help_text="A CSV with the columns Transaction ID, Amount, Timestamp, Description, Transaction Type, Account Number.")
 
 
+IMPORT_REPORT = inline_serializer("ImportReport", {
+    "created": serializers.IntegerField(), "skipped": serializers.IntegerField(), "rejected_count": serializers.IntegerField(),
+    "rejected": serializers.ListField(child=serializers.DictField(), help_text="The first 50 rejected rows: row number and field errors."),
+})
+
+
+@extend_schema(
+    summary="Import a CSV of transactions",
+    description="Multipart upload in the brief's column layout. Each row is validated like a submit; existing IDs are skipped, so importing the same file twice is safe; bad rows are reported with their line number. Unknown descriptions cost one model call per distinct description.",
+    request=ImportSerializer,
+    responses={200: IMPORT_REPORT, 400: OpenApiResponse(description="Missing file, not UTF-8, or the wrong columns")},
+)
 class TransactionImport(APIView):
     """POST a CSV file; every row is validated, categorised and stored. Existing IDs are skipped, bad rows reported."""
 

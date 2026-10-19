@@ -79,6 +79,9 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 50,
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser", "rest_framework.parsers.MultiPartParser"],
+    # No authentication in this exercise (decision 0005). Said here so the schema does not advertise one.
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "UNAUTHENTICATED_USER": None,
 }
 
@@ -87,6 +90,7 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Submit banking transactions; get them back in one of ten categories, with the reason.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "PREPROCESSING_HOOKS": ["config.openapi.strip_trailing_slash"],
 }
 
 # Categorisation (decision 0002)
