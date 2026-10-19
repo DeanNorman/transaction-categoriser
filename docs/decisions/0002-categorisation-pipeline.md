@@ -45,8 +45,9 @@ Only the description is sent to the model: not the amount, the account, or the t
 
 ## Consequences
 
-- Rules can be wrong or go stale. The evaluation set (`data/gold.csv`, `manage.py evaluate`) measures them, and a
-  `recategorise` command re-runs the pipeline when rules or the prompt change.
+- Rules can be wrong or go stale. The evaluation set (`data/gold.csv`, `manage.py evaluate`) measures them, and
+  `manage.py recategorise` re-runs the pipeline over stored rows when rules or the prompt change, or to upgrade the
+  rows that fell back before a model key existed.
 - A better prompt or model does not change cached decisions until the version key changes. That is deliberate:
   stability over silent drift.
 - Categorisation runs inside the request. A thousand-row import with a cold cache is about 20 calls, roughly 30
