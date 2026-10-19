@@ -138,15 +138,11 @@ def test_validate_answer_trims_the_reason_and_rounds_the_confidence():
     assert answer.confidence == Decimal("0.96") and len(answer.reason) == 200
 
 
-@pytest.mark.parametrize("choice, key, expected", [("fake", None, "fake"), ("none", None, "none"), ("auto", None, "none"), ("auto", "k", "gemini-pending")])
+@pytest.mark.parametrize("choice, key, expected", [("fake", None, "fake"), ("none", None, "none"), ("auto", None, "none"), ("auto", "k", "gemini-test"), ("gemini", "k", "gemini-test")])
 def test_the_provider_is_chosen_from_settings(settings, choice, key, expected):
-    settings.CATEGORISER_PROVIDER, settings.GEMINI_API_KEY = choice, key
+    settings.CATEGORISER_PROVIDER, settings.GEMINI_API_KEY, settings.GEMINI_MODEL = choice, key, "gemini-test"
 
-    if expected == "gemini-pending":
-        with pytest.raises((ImportError, Exception)):  # the Gemini provider lands in its own ticket
-            get_provider()
-    else:
-        assert get_provider().name == expected
+    assert get_provider().name == expected
 
 
 def test_unknown_provider_setting_is_refused(settings):

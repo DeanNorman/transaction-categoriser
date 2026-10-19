@@ -35,3 +35,10 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
 - Pipeline (#5): nine tests failed at once because the tool had used "Coolblue order 4471" as its example of an
   unknown merchant, and Coolblue is in the shop rule. The rules did their job; the tests were corrected to use a
   merchant no rule knows. A reminder that the fixture has to be checked against the rules, not assumed.
+- Gemini provider (#6): the SDK's exact call shape (`HttpOptions.timeout` in milliseconds, `response_json_schema`,
+  `ThinkingConfig.thinking_budget`, the `APIError` family) was read from the installed package by introspection
+  before any code, instead of trusting memory of the API. The prompt lives in `prompts/categorise.md` and is
+  loaded by the code, so the file in the repository is the prompt that runs.
+- Process (19 Oct): GitHub closed the stacked rules PR when the data-model branch beneath it was deleted on merge;
+  it does not retarget. The PR was reopened against `main`, and the rule from here on is: retarget the dependent PR
+  to `main` before merging the PR it stacks on.
