@@ -45,3 +45,6 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
 - API (#7): one integration test caught that every list query was quietly filtering `needs_review=false`: DRF
   treats a query string as form input, where a missing boolean is False rather than absent. Fixed by passing a
   plain dict. The kind of bug a unit test on the serializer would never have seen.
+- CSV import (#8): the importer reuses the POST serializer row by row, so a CSV row is validated exactly like an
+  API call and the two can never drift. A test pins that the sample file costs zero provider calls (every
+  description has a rule) and that 25 rows of one unknown merchant cost one call.

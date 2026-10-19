@@ -4,7 +4,9 @@ from django.db import transaction as db
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, serializers, status
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .categories import Category
 from .categoriser import categorise
@@ -114,3 +116,28 @@ class TransactionDetail(generics.RetrieveAPIView):
 
     def get_object(self):
         return get_object_or_404(Transaction, pk=self.kwargs["pk"])
+
+
+class ImportSerializer(serializers.Serializer):
+    file = serializers.FileField(help_text="A CSV with the columns Transaction ID, Amount, Timestamp, Description, Transaction Type, Account Number.")
+
+
+class TransactionImport(APIView):
+    """POST a CSV file; every row is validated, categorised and stored. Existing IDs are skipped, bad rows reported."""
+
+    parser_classes = [MultiPartParser]
+
+    def post(self, request):
+        from .importer import BadFile, import_csv  # here, not at the top: importer imports this module
+
+        incoming = ImportSerializer(data=request.data)
+        incoming.is_valid(raise_exception=True)
+        try:
+            text = incoming.validated_data["file"].read().decode("utf-8-sig")
+        except UnicodeDecodeError:
+            return Response({"file": ["not UTF-8 text"]}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            report = import_csv(text)
+        except BadFile as error:
+            return Response({"file": [str(error)]}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(report.as_dict(), status=status.HTTP_200_OK)
