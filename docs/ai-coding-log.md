@@ -57,3 +57,7 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
   and categorised on first start, every endpoint 200, the suite green inside the container, and a restart importing
   0 and skipping 1,000. The tool's first `curl | python -c` check line had a quoting error and printed nothing; the
   raw endpoint calls were the evidence instead.
+- Evaluation (#12): the gold set is author-labelled, with a note per row saying why the row is there, so a reviewer
+  can disagree with a label by name. Rules alone: 58 of 68, every rule hit right, the ten misses all fallbacks
+  (the model's job). Decision 0002 promised a `recategorise` command that had not been built; the README draft
+  surfaced the gap and it was built here, with the decision record corrected to describe what exists.

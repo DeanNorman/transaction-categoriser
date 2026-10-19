@@ -1,0 +1,69 @@
+description,category,source,note
+Tax Refund,Miscellaneous,sample,money in from the tax office (decision 0004)
+Car Lease Payment,Transportation,sample,
+Municipal Tax Payment,Housing,sample,defensible as Utilities; the choice is in decision 0004
+Albert Heijn Purchase,Groceries,sample,
+NS Train Ticket,Transportation,sample,
+Transfer to ING Account,Miscellaneous,sample,transfer between accounts
+Payment to Ziggo,Utilities,sample,
+Payment to Rabobank,Miscellaneous,sample,could be a mortgage instalment; flagged for a person
+Netflix Subscription,Entertainment,sample,
+Bunq Transfer,Miscellaneous,sample,
+PayPal Transfer,Miscellaneous,sample,payment rail with no merchant; flagged
+Bol.com Purchase,Shopping,sample,
+Eneco Energy Bill,Utilities,sample,
+Payment to Credit Card,Miscellaneous,sample,repayment of spending already categorised
+Salary from Employer,Miscellaneous,sample,income
+iDEAL Payment,Miscellaneous,sample,payment rail with no merchant; flagged
+T-Mobile Bill Payment,Utilities,sample,
+Rent Payment,Housing,sample,
+AH Online Groceries,Groceries,sample,
+Geldmaat ATM Withdrawal,Miscellaneous,sample,cash
+Jumbo Supermarkt Utrecht,Groceries,edge,known brand
+Lidl Rotterdam Centrum,Groceries,edge,known brand
+Bakkerij Bart Haarlem,Groceries,edge,no rule: the model must know a bakkerij
+Marqt Amsterdam Zuid,Groceries,edge,no rule: a small Dutch organic supermarket chain
+Picnic boodschappen,Groceries,edge,known brand
+Thuisbezorgd.nl order 8812,Dining Out,edge,known brand
+Uber Eats Rotterdam,Dining Out,edge,known brand; must beat the generic uber transport word
+Cafe Loetje Amsterdam,Dining Out,edge,plain word
+Ristorante Il Casale,Dining Out,edge,no rule: the model must read Italian
+Starbucks Centraal,Dining Out,edge,known brand
+Vattenfall termijnbedrag,Utilities,edge,known brand
+KPN Internet,Utilities,edge,known brand
+Waternet Amsterdam,Utilities,edge,known brand
+Odido Mobile,Utilities,edge,known brand
+Essent energie,Utilities,edge,known brand
+Shell Tankstation A2,Transportation,edge,known brand
+GVB OV-chipkaart,Transportation,edge,known brand
+Q-Park parkeren,Transportation,edge,plain word
+Fietsenmaker Van Dam,Transportation,edge,no rule: bicycle repair
+Uber trip Amsterdam,Transportation,edge,plain word
+Spotify AB,Entertainment,edge,known brand
+Pathe Tuschinski,Entertainment,edge,known brand
+Steam Games,Entertainment,edge,plain word
+Rijksmuseum tickets,Entertainment,edge,plain word
+Ticketmaster concert,Entertainment,edge,known brand
+Apotheek De Brug,Healthcare,edge,known word
+Tandarts Jansen,Healthcare,edge,plain word
+Zilveren Kruis premie,Healthcare,edge,known brand
+Fysiotherapie Zuid,Healthcare,edge,no rule: Dutch for physiotherapy
+Huisartsenpraktijk Noord,Healthcare,edge,plain word inside a longer word
+Zalando SE,Shopping,edge,known brand
+Coolblue order 4471,Shopping,edge,known brand
+IKEA Amsterdam,Shopping,edge,known brand
+HEMA Utrecht,Shopping,edge,known brand
+Decathlon Utrecht,Shopping,edge,no rule: a sports shop
+Hypotheek ABN AMRO,Housing,edge,housing must beat the bank name
+VvE bijdrage,Housing,edge,known word
+Huur oktober,Housing,edge,plain word
+Interpolis woonverzekering,Housing,edge,no rule: home insurance
+Collegegeld UvA 2024,Education,edge,known words
+Udemy course,Education,edge,known brand
+DUO studiefinanciering,Education,edge,known brand
+Boekhandel studieboeken,Education,edge,no rule: textbooks
+Tikkie van Piet,Miscellaneous,edge,payment rail
+Belastingdienst aanslag,Miscellaneous,edge,tax
+Spaarrekening overboeking,Miscellaneous,edge,transfer to savings
+Revolut top-up,Miscellaneous,edge,transfer to another account
+XK-7731 Services BV,Miscellaneous,edge,no rule and no clue: the honest answer is Miscellaneous
