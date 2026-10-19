@@ -29,3 +29,6 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
   by the author before the first code commit.
 - Data model (#2): the tool proposed masking IBANs as `NL**INGB******3686`; changed by hand to a generic "first two,
   last four" mask that also hides the length, and decision 0005 was corrected to match before the code landed.
+- Rules (#4): the tool's first draft of the "unknown merchant" test asserted that an Italian restaurant name *would*
+  match a rule; the run failed and the assertion was turned round: an unknown merchant must match nothing, so the
+  model gets asked. Caught by running the suite, not by reading.
