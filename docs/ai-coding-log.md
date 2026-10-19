@@ -61,3 +61,5 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
   can disagree with a label by name. Rules alone: 58 of 68, every rule hit right, the ten misses all fallbacks
   (the model's job). Decision 0002 promised a `recategorise` command that had not been built; the README draft
   surfaced the gap and it was built here, with the decision record corrected to describe what exists.
+- README (#13): written last, from what was run, with the response JSON and the numbers pasted from the Docker run
+  and the evaluation. `requirements.lock` is `pip freeze` from inside the built image, not from the laptop.
