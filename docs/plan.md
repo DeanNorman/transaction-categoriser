@@ -1,7 +1,8 @@
 # Build plan
 
-Written before the code, after a short grill of the brief. Each step is one or two commits; the history should
-read like this list. Checked off as they land.
+Written before the code, after a short grill of the brief. Steps 1 to 3 landed directly on `main`. From step 4 the
+plan lives on the issue tracker as a map with one sub-issue per step, each landed by its own pull request:
+[Map: a transaction categorisation service that explains every decision](https://github.com/DeanNorman/transaction-categoriser/issues/1).
 
 1. Repository skeleton: ignore rules, the working agreement (`CLAUDE.md`), the sample data.
 2. The thinking: decision records 0001 to 0005, this plan, the AI coding log.
