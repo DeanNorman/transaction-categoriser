@@ -1,0 +1,40 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [postgres, sqlite]
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: transactions
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U app -d transactions"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Set the database for this matrix entry
+        if: matrix.database == 'postgres'
+        run: echo "DATABASE_URL=postgres://app:app@localhost:5432/transactions" >> "$GITHUB_ENV"
+      - run: python manage.py check
+      - run: python manage.py makemigrations --check --dry-run
+      - run: pytest --cov=transactions --cov=config --cov-report=term-missing
