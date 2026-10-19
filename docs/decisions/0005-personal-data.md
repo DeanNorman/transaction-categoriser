@@ -10,7 +10,7 @@ text to a third-party model and writes logs.
 ## Decision
 
 - Account numbers are stored in full (they are the data) and **masked in every API response**:
-  `NLINGB1944573686` becomes `NL**INGB******3686`. A consumer of this API already knows its own accounts; this
+  `NLINGB1944573686` becomes `NL******3686` (the first two and last four characters; the length is hidden too). A consumer of this API already knows its own accounts; this
   service's job is categories.
 - **Only the description goes to the model.** Never the amount, the account, the time or the ID. The prompt has
   no room for them, so this cannot drift by accident.
