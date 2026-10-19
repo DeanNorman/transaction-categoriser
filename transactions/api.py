@@ -181,3 +181,17 @@ class TransactionImport(APIView):
         except BadFile as error:
             return Response({"file": [str(error)]}, status=status.HTTP_400_BAD_REQUEST)
         return Response(report.as_dict(), status=status.HTTP_200_OK)
+
+
+CATEGORY_COUNT = inline_serializer("CategoryCount", {
+    "category": serializers.ChoiceField(choices=Category.choices), "count": serializers.IntegerField(),
+    "needs_review": serializers.IntegerField(help_text="How many in this category are flagged for a person."),
+}, many=True)
+
+
+@extend_schema(summary="Counts per category", description="All ten categories in the brief's order, with how many transactions landed in each and how many of those need a look. Zero counts are included.", responses={200: CATEGORY_COUNT})
+class CategoryCounts(APIView):
+    def get(self, request):
+        from .review import category_counts  # here, not at the top: review imports this module
+
+        return Response(category_counts(Transaction.objects.all()))

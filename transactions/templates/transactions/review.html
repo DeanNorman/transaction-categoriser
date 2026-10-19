@@ -1,0 +1,134 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Categorised transactions · review</title>
+<style>
+  :root { --ink: #0a0a0a; --ink-2: #333; --muted: #6b6b6b; --line: #e5e5e5; --surface: #f7f7f5; --paper: #fff;
+          --accent: #1f4fd8; --accent-soft: #e8eefc; --flag: #8a2a1d; --flag-soft: #fbeae7; --ok: #14612f; --ok-soft: #e3f4e8;
+          --mono: ui-monospace, "SF Mono", Menlo, monospace; --text: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font: 14px/1.45 var(--text); color: var(--ink); background: var(--surface); -webkit-font-smoothing: antialiased; }
+  main { max-width: 1280px; margin: 0 auto; padding: 24px 24px 48px; }
+  header h1 { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  header p { color: var(--muted); margin-top: 4px; max-width: 80ch; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 18px 0; }
+  .kpi { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .kpi b { display: block; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .kpi span { color: var(--muted); font-size: 12px; }
+  .kpi.flag { border-top: 3px solid var(--flag); } .kpi.flag b { color: var(--flag); }
+  h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 18px 0 8px; }
+  .cats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .cat { display: block; text-decoration: none; color: inherit; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .cat:hover, .cat:focus-visible { border-color: var(--accent); outline: none; }
+  .cat.active { border-color: var(--accent); background: var(--accent-soft); }
+  .cat b { font-size: 20px; font-variant-numeric: tabular-nums; }
+  .cat span { display: block; font-size: 12px; color: var(--muted); }
+  .cat small { color: var(--flag); font-weight: 600; }
+  form.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-top: 18px; }
+  form.filters label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); display: block; margin-bottom: 4px; }
+  form.filters select, form.filters input { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); }
+  form.filters button, form.filters a { font: 600 13px var(--text); padding: 7px 12px; border-radius: 7px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); text-decoration: none; cursor: pointer; }
+  form.filters button { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .errors { color: var(--flag); font-weight: 600; margin-top: 8px; }
+  .table-wrap { overflow-x: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; margin-top: 14px; }
+  table { width: 100%; min-width: 1000px; border-collapse: collapse; }
+  th { font: 600 10px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  tr:hover td { background: #fafaf8; }
+  tr.flagged td:first-child { box-shadow: inset 4px 0 0 var(--flag); }
+  .mono { font-family: var(--mono); font-size: 12.5px; }
+  .num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .num.neg { color: var(--ink-2); } .num.pos { color: var(--ok); }
+  .pill { display: inline-block; font: 600 11px var(--mono); padding: 3px 8px; border-radius: 999px; background: var(--surface); color: var(--ink-2); white-space: nowrap; }
+  .pill.misc { background: #efefef; color: var(--muted); }
+  .conf { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .conf b { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 34px; }
+  .bar { width: 60px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .method { font: 600 11px var(--mono); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .method::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .method.rule::before { background: var(--ok); } .method.model::before { background: var(--accent); }
+  .method.cache::before { background: #8ea2ff; } .method.fallback::before { background: var(--flag); }
+  .why { color: var(--muted); max-width: 40ch; }
+  .flagtxt { color: var(--flag); font-weight: 600; white-space: nowrap; }
+  .empty { padding: 40px 20px; text-align: center; color: var(--muted); }
+  .empty code { font-family: var(--mono); background: var(--surface); padding: 2px 6px; border-radius: 5px; }
+  nav.pages { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--muted); font-size: 13px; }
+  nav.pages a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  footer { margin-top: 24px; color: var(--muted); font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>Categorised transactions</h1>
+  <p>Every transaction, its category, how sure the system is, and the rule or model that decided it. Confidence is the categoriser's own estimate, not a measured accuracy. Rows marked <strong>needs a look</strong> fell back or scored below the review threshold.</p>
+</header>
+
+<section class="kpis" aria-label="Totals">
+  <div class="kpi"><b>{{ total }}</b><span>transactions</span></div>
+  <div class="kpi flag"><b>{{ needs_review }}</b><span>need a look</span></div>
+  {% for m in methods %}<div class="kpi"><b>{{ m.count }}</b><span>decided by {{ m.label|lower }}</span></div>{% endfor %}
+</section>
+
+<h2>By category</h2>
+<section class="cats" aria-label="Counts per category">
+  {% for c in categories %}
+  <a class="cat{% if filters.category == c.category %} active{% endif %}" href="?category={{ c.category|urlencode }}">
+    <b>{{ c.count }}</b><span>{{ c.category }}</span>{% if c.needs_review %}<small>{{ c.needs_review }} need a look</small>{% endif %}
+  </a>
+  {% endfor %}
+</section>
+
+<form class="filters" method="get" action="">
+  <div><label for="f-category">Category</label>
+    <select id="f-category" name="category"><option value="">Any</option>{% for name in category_choices %}<option value="{{ name }}"{% if filters.category == name %} selected{% endif %}>{{ name }}</option>{% endfor %}</select></div>
+  <div><label for="f-method">Decided by</label>
+    <select id="f-method" name="method"><option value="">Any</option>{% for name in method_choices %}<option value="{{ name }}"{% if filters.method == name %} selected{% endif %}>{{ name }}</option>{% endfor %}</select></div>
+  <div><label for="f-review">Needs a look</label>
+    <select id="f-review" name="needs_review"><option value="">Any</option><option value="true"{% if filters.needs_review == "true" %} selected{% endif %}>Yes</option><option value="false"{% if filters.needs_review == "false" %} selected{% endif %}>No</option></select></div>
+  <div><label for="f-since">Since</label><input id="f-since" type="date" name="since" value="{{ filters.since }}"></div>
+  <div><label for="f-until">Until</label><input id="f-until" type="date" name="until" value="{{ filters.until }}"></div>
+  <button type="submit">Filter</button>
+  <a href="?">Clear</a>
+</form>
+{% if errors %}<p class="errors">Some filters were not understood: {% for field, messages in errors.items %}{{ field }}: {{ messages|join:", " }}{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>When</th><th>Description</th><th class="num">Amount</th><th>Category</th><th>Confidence</th><th>Decided by</th><th>Why</th><th></th></tr></thead>
+  <tbody>
+  {% for t in page %}
+    <tr{% if t.needs_review %} class="flagged"{% endif %}>
+      <td class="mono">{{ t.id }}</td>
+      <td class="mono">{{ t.timestamp|date:"Y-m-d H:i" }}</td>
+      <td>{{ t.description }}</td>
+      <td class="num {% if t.amount_cents < 0 %}neg{% else %}pos{% endif %}">{{ t.amount }} {{ t.currency }}</td>
+      <td><span class="pill{% if t.category == 'Miscellaneous' %} misc{% endif %}">{{ t.category }}</span></td>
+      <td><div class="conf"><b>{{ t.confidence }}</b><div class="bar" aria-hidden="true"><i style="width: {% widthratio t.confidence 1 100 %}%"></i></div></div></td>
+      <td><span class="method {{ t.method }}">{{ t.method }}{% if t.model_name %} · {{ t.model_name }}{% endif %}</span></td>
+      <td class="why">{{ t.reason }}</td>
+      <td>{% if t.needs_review %}<span class="flagtxt">needs a look</span>{% endif %}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="9" class="empty">
+      {% if total %}No transactions match these filters.{% else %}No transactions yet. Import the sample: <code>python manage.py import_csv data/transaction_history.csv</code>, or <code>POST /transactions</code>.{% endif %}
+    </td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<nav class="pages">
+  <span>{{ shown }} of {{ total }} shown{% if page.paginator.num_pages > 1 %} · page {{ page.number }} of {{ page.paginator.num_pages }}{% endif %}</span>
+  <span>{% if page.has_previous %}<a href="?{{ query }}{% if query %}&amp;{% endif %}page={{ page.previous_page_number }}">Previous</a>{% endif %}
+        {% if page.has_previous and page.has_next %} · {% endif %}
+        {% if page.has_next %}<a href="?{{ query }}{% if query %}&amp;{% endif %}page={{ page.next_page_number }}">Next</a>{% endif %}</span>
+</nav>
+<footer>Account numbers are not shown on this page. The API: <a href="/docs">/docs</a>.</footer>
+</main>
+</body>
+</html>

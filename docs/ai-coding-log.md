@@ -48,3 +48,8 @@ Recorded as the build goes, one line each: what was asked, what came back, what 
 - CSV import (#8): the importer reuses the POST serializer row by row, so a CSV row is validated exactly like an
   API call and the two can never drift. A test pins that the sample file costs zero provider calls (every
   description has a rule) and that 25 rows of one unknown merchant cost one call.
+- Review page (#10): the page reuses the API's filter serializer, so the page and `GET /transactions` agree on what a
+  filter means. Patterns borrowed from an earlier project of the author's: status as a mark plus text, confidence
+  as a tabular number with a small bar, a left-edge accent on flagged rows, and the line "confidence is the
+  categoriser's own estimate, not a measured accuracy". The tool's first draft called an `inline_serializer`
+  result as if it were a class; the collection error said so at once.
